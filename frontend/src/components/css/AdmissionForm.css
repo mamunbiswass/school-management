@@ -1,0 +1,120 @@
+@page {
+  size: A4;
+  margin: 12mm 12mm;
+}
+
+body {
+  font-family: "Helvetica", Arial, sans-serif;
+}
+
+.sheet {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: #fff;
+  padding: 18mm;
+  box-sizing: border-box;
+  color: #1f2937;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.logo {
+  width: 72px;
+  height: 72px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.school-info {
+  flex: 1;
+  text-align: center;
+}
+.school-info h1 {
+  margin: 0;
+  font-size: 20px;
+}
+.school-info p {
+  margin: 2px 0;
+  font-size: 12px;
+}
+.photo-box {
+  width: 90px;
+  height: 110px;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 12px 0 18px;
+  border: none;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 12px;
+}
+.title h2 {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.info {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.info td {
+  border: 1px solid #e6e7eb;
+  padding: 6px;
+}
+.info td.label {
+  background: #f8fafc;
+  font-weight: 600;
+  width: 38%;
+}
+.full {
+  grid-column: 1 / -1;
+}
+
+.sigs {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+.sig {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+}
+.sig .line {
+  height: 1px;
+  background: #cbd5e1;
+  margin: 36px 20px 8px;
+}
+
+.footer {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 11px;
+  color: #6b7280;
+}
