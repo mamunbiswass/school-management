@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion"; // animation
-// import AddressSelector from "./AddressSelector";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdmissionForm() {
   const [step, setStep] = useState(1);
@@ -20,8 +19,12 @@ export default function AdmissionForm() {
   }, []);
 
   const fetchClasses = async () => {
-    const res = await axios.get(`${API_URL}/api/classes`);
-    setClasses(res.data);
+    try {
+      const res = await axios.get(`${API_URL}/api/classes`);
+      setClasses(res.data);
+    } catch (err) {
+      console.error("Class fetch error:", err);
+    }
   };
 
   const fetchSchool = async () => {
@@ -59,30 +62,23 @@ export default function AdmissionForm() {
     e.preventDefault();
     try {
       const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        data.append(key, value);
-      });
+      Object.entries(formData).forEach(([key, value]) =>
+        data.append(key, value)
+      );
 
       await axios.post(`${API_URL}/api/students`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      showToast("success", "✅ Student admitted successfully!");
+      showToast("success", "🎉 Student admitted successfully!");
       setFormData({});
       setPreview(null);
       setStep(1);
     } catch (err) {
-      console.error("❌ Submit error:", err.message);
+      console.error("Submit error:", err.message);
       showToast("error", "❌ Failed to submit admission form");
     }
   };
-
-  const [address, setAddress] = useState({});
-
-  const handleAddressChange = (data) => {
-    setAddress(data); // এখানে district, ps, po, village থাকবে
-  };
-
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
@@ -96,7 +92,7 @@ export default function AdmissionForm() {
         name={name}
         onChange={handleChange}
         value={formData[name] || ""}
-        className="border rounded px-3 h-10 focus:ring focus:ring-blue-200"
+        className="border rounded-lg px-3 h-10 focus:ring-2 focus:ring-blue-300 transition"
         {...extra}
       />
     </div>
@@ -109,7 +105,7 @@ export default function AdmissionForm() {
         name={name}
         onChange={handleChange}
         value={formData[name] || ""}
-        className="border rounded px-3 h-10 focus:ring focus:ring-blue-200"
+        className="border rounded-lg px-3 h-10 focus:ring-2 focus:ring-blue-300 transition"
         {...extra}
       >
         <option value="">Select {label}</option>
@@ -123,34 +119,44 @@ export default function AdmissionForm() {
   );
 
   return (
-    <div className="relative max-w-5xl mx-auto">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-lg p-8 rounded-lg overflow-hidden"
-      >
-        {/* Progress Bar */}
-        <div className="flex items-center mb-8">
-          {["Basic", "Parent", "Other"].map((label, index) => (
-            <div key={index} className="flex-1">
-              <div
-                className={`h-2 rounded-full ${
-                  step > index ? "bg-blue-600" : "bg-gray-300"
-                }`}
-              ></div>
-              <p
-                className={`text-center text-sm mt-1 ${
-                  step === index + 1
-                    ? "font-bold text-blue-600"
-                    : "text-gray-500"
-                }`}
-              >
-                {label}
-              </p>
-            </div>
-          ))}
-        </div>
+    <div className="relative max-w-5xl mx-auto bg-white shadow-lg p-8 rounded-xl mt-8 mb-8">
+      {/* School Header */}
+      <div className="flex flex-col items-center mb-6 border-b pb-4">
+        {school?.logo && (
+          <img
+            src={`${API_URL}${school.logo}`}
+            alt="School Logo"
+            className="w-20 h-20 object-contain mb-2"
+          />
+        )}
+        <h1 className="text-2xl font-bold text-blue-700">{school?.name}</h1>
+        <p className="text-gray-600 text-sm">{school?.address}</p>
+      </div>
 
-        {/* Step Content with Animation */}
+      {/* Progress Bar */}
+      <div className="flex items-center mb-8">
+        {["Basic Info", "Parent Info", "Other Info"].map((label, index) => (
+          <div key={index} className="flex-1 text-center relative">
+            <div
+              className={`h-2 rounded-full ${
+                step > index ? "bg-blue-600" : "bg-gray-300"
+              }`}
+            ></div>
+            <p
+              className={`text-sm mt-1 ${
+                step === index + 1
+                  ? "font-semibold text-blue-600"
+                  : "text-gray-500"
+              }`}
+            >
+              {label}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Animated Form Steps */}
+      <form onSubmit={handleSubmit}>
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div
@@ -159,8 +165,9 @@ export default function AdmissionForm() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 40 }}
               transition={{ duration: 0.3 }}
+              className="space-y-6"
             >
-              <h2 className="text-xl font-bold mb-6">
+              <h2 className="text-lg font-semibold mb-4 text-blue-700">
                 Step 1: Basic & Academic Info
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -170,18 +177,6 @@ export default function AdmissionForm() {
                   required: true,
                 })}
                 {renderInput("Date of Birth", "dob", "date", { required: true })}
-                <div className="flex flex-col col-span-2">
-                  <label className="mb-1 text-sm font-medium text-gray-700">
-                    Address
-                  </label>
-                  <textarea
-                    name="address"
-                    onChange={handleChange}
-                    value={formData.address || ""}
-                    className="border rounded px-3 py-2 focus:ring focus:ring-blue-200"
-                    required
-                  ></textarea>
-                </div>
                 {renderSelect(
                   "Class",
                   "className",
@@ -195,6 +190,18 @@ export default function AdmissionForm() {
                 {renderInput("Roll No", "roll", "number")}
                 <div className="flex flex-col col-span-2">
                   <label className="mb-1 text-sm font-medium text-gray-700">
+                    Address
+                  </label>
+                  <textarea
+                    name="address"
+                    onChange={handleChange}
+                    value={formData.address || ""}
+                    className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-300 transition"
+                    required
+                  ></textarea>
+                </div>
+                <div className="flex flex-col col-span-2">
+                  <label className="mb-1 text-sm font-medium text-gray-700">
                     Photo
                   </label>
                   <input
@@ -202,7 +209,7 @@ export default function AdmissionForm() {
                     name="photo"
                     accept="image/*"
                     onChange={handleChange}
-                    className="border rounded px-3 py-2"
+                    className="border rounded-lg px-3 py-2"
                   />
                   {preview && (
                     <img
@@ -213,15 +220,12 @@ export default function AdmissionForm() {
                   )}
                 </div>
               </div>
-              
-                {/* <AddressSelector onChange={handleAddressChange} /> */}
-
 
               <div className="flex justify-end mt-8">
                 <button
                   type="button"
-                  onClick={nextStep}
-                  className="px-6 py-2 bg-blue-600 text-white rounded"
+                  onClick={() => setStep(2)}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
                   Next →
                 </button>
@@ -236,8 +240,9 @@ export default function AdmissionForm() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 40 }}
               transition={{ duration: 0.3 }}
+              className="space-y-6"
             >
-              <h2 className="text-xl font-bold mb-6">
+              <h2 className="text-lg font-semibold mb-4 text-blue-700">
                 Step 2: Parent & Health Info
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -264,22 +269,22 @@ export default function AdmissionForm() {
                     name="healthInfo"
                     onChange={handleChange}
                     value={formData.healthInfo || ""}
-                    className="border rounded px-3 py-2 focus:ring focus:ring-blue-200"
+                    className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-300 transition"
                   ></textarea>
                 </div>
               </div>
               <div className="flex justify-between mt-8">
                 <button
                   type="button"
-                  onClick={prevStep}
-                  className="px-6 py-2 bg-gray-400 text-white rounded"
+                  onClick={() => setStep(1)}
+                  className="px-6 py-2 bg-gray-400 text-white rounded-lg"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
-                  onClick={nextStep}
-                  className="px-6 py-2 bg-blue-600 text-white rounded"
+                  onClick={() => setStep(3)}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg"
                 >
                   Next →
                 </button>
@@ -294,8 +299,11 @@ export default function AdmissionForm() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 40 }}
               transition={{ duration: 0.3 }}
+              className="space-y-6"
             >
-              <h2 className="text-xl font-bold mb-6">Step 3: Other Info</h2>
+              <h2 className="text-lg font-semibold mb-4 text-blue-700">
+                Step 3: Other Info
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {renderSelect("Caste", "caste", [
                   "General",
@@ -326,21 +334,21 @@ export default function AdmissionForm() {
                     name="hobbies"
                     onChange={handleChange}
                     value={formData.hobbies || ""}
-                    className="border rounded px-3 py-2 focus:ring focus:ring-blue-200"
+                    className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-300 transition"
                   ></textarea>
                 </div>
               </div>
               <div className="flex justify-between mt-8">
                 <button
                   type="button"
-                  onClick={prevStep}
-                  className="px-6 py-2 bg-gray-400 text-white rounded"
+                  onClick={() => setStep(2)}
+                  className="px-6 py-2 bg-gray-400 text-white rounded-lg"
                 >
                   ← Back
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-green-600 text-white rounded"
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                 >
                   ✅ Submit Admission
                 </button>
@@ -353,8 +361,9 @@ export default function AdmissionForm() {
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50
-          ${toast.type === "success" ? "bg-green-600" : "bg-red-600"} text-white`}
+          className={`fixed top-6 right-6 px-5 py-3 rounded-lg shadow-lg text-white text-sm transition transform duration-300 ${
+            toast.type === "success" ? "bg-green-600" : "bg-red-600"
+          }`}
         >
           {toast.msg}
         </div>

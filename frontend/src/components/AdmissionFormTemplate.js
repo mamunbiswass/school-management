@@ -4,180 +4,195 @@ import "./css/AdmissionForm.css";
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export default function AdmissionFormTemplate({ school, student }) {
+  const getImageURL = (path) => {
+    if (!path) return "/no-photo.png";
+    if (path.startsWith("http")) return path;
+    return `${API_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+  };
+
   return (
-    <div className="sheet" id="admission-sheet">
-      {/* Header */}
-      <div className="header">
-        {/* School Logo */}
-        <div className="logo">
+    <div className="admission-sheet" id="admission-sheet">
+      {/* ===== HEADER ===== */}
+      <header className="admission-header">
+        <div className="school-logo-box">
           {school.logo ? (
-            
-            <img src={`${API_URL}${student.photo}`} alt="student" />
+            <img
+              src={getImageURL(school.logo)}
+              alt="School Logo"
+              className="school-logo"
+            />
           ) : (
             <div className="no-logo">No Logo</div>
           )}
         </div>
 
-        {/* School Info */}
-        <div className="school-info">
+        <div className="school-details">
           <h1>{school.name}</h1>
           <p>{school.address}</p>
           <p className="muted">
-            Phone: {school.phone} | Email: {school.email}
+            📞 {school.phone} | ✉️ {school.email}
           </p>
         </div>
 
-        {/* Student Photo */}
-        <div className="photo-box">
+        <div className="student-photo-box">
           {student.photo ? (
             <img
-              src={`${API_URL}${student.photo.startsWith("/") ? student.photo : "/" + student.photo}`}
+              src={getImageURL(student.photo)}
               alt={student.name}
-              className="student-img"
+              className="student-photo"
             />
           ) : (
             <div className="no-photo">No Photo</div>
           )}
         </div>
+      </header>
 
-      </div>
-
-      <hr className="divider" />
-      <div className="title">
+      {/* ===== TITLE ===== */}
+      <div className="form-title">
         <h2>STUDENT ADMISSION FORM</h2>
       </div>
 
-      {/* ===== Basic Info ===== */}
-      <h3 className="section-title">Basic Info</h3>
-      <table className="info">
-        <tbody>
-          <tr>
-            <td className="label">Admission No</td>
-            <td>{student.admissionNo}</td>
-            <td className="label">Aadhaar / UID</td>
-            <td>{student.uid}</td>
-          </tr>
-          <tr>
-            <td className="label">Name</td>
-            <td>{student.name}</td>
-            <td className="label">Gender</td>
-            <td>{student.gender}</td>
-          </tr>
-          <tr>
-            <td className="label">Date of Birth</td>
-            <td colSpan={3}>
-              {student.dob} {student.age ? `(Age: ${student.age})` : ""}
-            </td>
-          </tr>
-          <tr>
-            <td className="label">Address</td>
-            <td colSpan={3}>{student.address}</td>
-          </tr>
-        </tbody>
-      </table>
+      {/* ===== BASIC INFO ===== */}
+      <section>
+        <h3 className="section-title">Basic Information</h3>
+        <table className="info-table">
+          <tbody>
+            <tr>
+              <th>Admission No</th>
+              <td>{student.admissionNo}</td>
+              <th>Aadhaar / UID</th>
+              <td>{student.uid}</td>
+            </tr>
+            <tr>
+              <th>Name</th>
+              <td>{student.name}</td>
+              <th>Gender</th>
+              <td>{student.gender}</td>
+            </tr>
+            <tr>
+              <th>Date of Birth</th>
+              <td colSpan={3}>
+                {student.dob} {student.age ? `(Age: ${student.age})` : ""}
+              </td>
+            </tr>
+            <tr>
+              <th>Address</th>
+              <td colSpan={3}>{student.address}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-      {/* ===== Academic Info ===== */}
-      <h3 className="section-title">Academic Info</h3>
-      <table className="info">
-        <tbody>
-          <tr>
-            <td className="label">Class</td>
-            <td>{student.className}</td>
-            <td className="label">Section</td>
-            <td>{student.section}</td>
-          </tr>
-          <tr>
-            <td className="label">Roll No</td>
-            <td>{student.roll}</td>
-            <td className="label">Admission Date</td>
-            <td>{student.admissionDate}</td>
-          </tr>
-          <tr>
-            <td className="label">Previous School</td>
-            <td>{student.prevSchool}</td>
-            <td className="label">Transfer Certificate</td>
-            <td>{student.transferCert}</td>
-          </tr>
-        </tbody>
-      </table>
+      {/* ===== ACADEMIC INFO ===== */}
+      <section>
+        <h3 className="section-title">Academic Details</h3>
+        <table className="info-table">
+          <tbody>
+            <tr>
+              <th>Class</th>
+              <td>{student.className}</td>
+              <th>Section</th>
+              <td>{student.section}</td>
+            </tr>
+            <tr>
+              <th>Roll No</th>
+              <td>{student.roll}</td>
+              <th>Admission Date</th>
+              <td>{student.admissionDate}</td>
+            </tr>
+            <tr>
+              <th>Previous School</th>
+              <td>{student.prevSchool}</td>
+              <th>Transfer Certificate</th>
+              <td>{student.transferCert}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-      {/* ===== Parent Info ===== */}
-      <h3 className="section-title">Parent & Guardian Info</h3>
-      <table className="info">
-        <tbody>
-          <tr>
-            <td className="label">Father's Name</td>
-            <td>{student.father}</td>
-            <td className="label">Occupation</td>
-            <td>{student.fatherOccupation}</td>
-          </tr>
-          <tr>
-            <td className="label">Mother's Name</td>
-            <td>{student.mother}</td>
-            <td className="label">Occupation</td>
-            <td>{student.motherOccupation}</td>
-          </tr>
-          <tr>
-            <td className="label">Phone</td>
-            <td>{student.phone}</td>
-            <td className="label">Email</td>
-            <td>{student.email}</td>
-          </tr>
-          <tr>
-            <td className="label">Guardian</td>
-            <td>{student.guardian}</td>
-            <td className="label">Relation</td>
-            <td>{student.guardianRelation}</td>
-          </tr>
-          <tr>
-            <td className="label">Guardian Phone</td>
-            <td colSpan={3}>{student.guardianPhone}</td>
-          </tr>
-        </tbody>
-      </table>
+      {/* ===== PARENT INFO ===== */}
+      <section>
+        <h3 className="section-title">Parent & Guardian Information</h3>
+        <table className="info-table">
+          <tbody>
+            <tr>
+              <th>Father's Name</th>
+              <td>{student.father}</td>
+              <th>Occupation</th>
+              <td>{student.fatherOccupation}</td>
+            </tr>
+            <tr>
+              <th>Mother's Name</th>
+              <td>{student.mother}</td>
+              <th>Occupation</th>
+              <td>{student.motherOccupation}</td>
+            </tr>
+            <tr>
+              <th>Phone</th>
+              <td>{student.phone}</td>
+              <th>Email</th>
+              <td>{student.email}</td>
+            </tr>
+            <tr>
+              <th>Guardian</th>
+              <td>{student.guardian}</td>
+              <th>Relation</th>
+              <td>{student.guardianRelation}</td>
+            </tr>
+            <tr>
+              <th>Guardian Phone</th>
+              <td colSpan={3}>{student.guardianPhone}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-      {/* ===== Health Info ===== */}
-      <h3 className="section-title">Health Info</h3>
-      <table className="info">
-        <tbody>
-          <tr>
-            <td className="label">Blood Group</td>
-            <td>{student.bloodGroup}</td>
-            <td className="label">Emergency Contact</td>
-            <td>{student.emergencyContact}</td>
-          </tr>
-          <tr>
-            <td className="label">Health Info</td>
-            <td colSpan={3}>{student.healthInfo}</td>
-          </tr>
-        </tbody>
-      </table>
+      {/* ===== HEALTH INFO ===== */}
+      <section>
+        <h3 className="section-title">Health Information</h3>
+        <table className="info-table">
+          <tbody>
+            <tr>
+              <th>Blood Group</th>
+              <td>{student.bloodGroup}</td>
+              <th>Emergency Contact</th>
+              <td>{student.emergencyContact}</td>
+            </tr>
+            <tr>
+              <th>Health Notes</th>
+              <td colSpan={3}>{student.healthInfo}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-      {/* ===== Other Info ===== */}
-      <h3 className="section-title">Other Info</h3>
-      <table className="info">
-        <tbody>
-          <tr>
-            <td className="label">Caste</td>
-            <td>{student.caste}</td>
-            <td className="label">Religion</td>
-            <td>{student.religion}</td>
-          </tr>
-          <tr>
-            <td className="label">Nationality</td>
-            <td>{student.nationality}</td>
-            <td className="label">Mother Tongue</td>
-            <td>{student.motherTongue}</td>
-          </tr>
-          <tr>
-            <td className="label">Hobbies</td>
-            <td colSpan={3}>{student.hobbies}</td>
-          </tr>
-        </tbody>
-      </table>
+      {/* ===== OTHER INFO ===== */}
+      <section>
+        <h3 className="section-title">Other Details</h3>
+        <table className="info-table">
+          <tbody>
+            <tr>
+              <th>Caste</th>
+              <td>{student.caste}</td>
+              <th>Religion</th>
+              <td>{student.religion}</td>
+            </tr>
+            <tr>
+              <th>Nationality</th>
+              <td>{student.nationality}</td>
+              <th>Mother Tongue</th>
+              <td>{student.motherTongue}</td>
+            </tr>
+            <tr>
+              <th>Hobbies</th>
+              <td colSpan={3}>{student.hobbies}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-      {/* Signature */}
-      <div className="sigs">
+      {/* ===== SIGNATURE ===== */}
+      <div className="signature-area">
         <div className="sig">
           <div className="line"></div>
           Guardian / Parent
@@ -192,13 +207,14 @@ export default function AdmissionFormTemplate({ school, student }) {
         </div>
       </div>
 
-      <div className="footer small">
-        <div>Generated by — School Management System</div>
-        <div className="muted">
-          Note: Please attach required documents (Aadhar copy, Transfer
-          Certificate, photograph) with this form.
-        </div>
-      </div>
+      {/* ===== FOOTER ===== */}
+      <footer className="admission-footer">
+        <p>Generated by — School Management System</p>
+        <small className="muted">
+          Note: Please attach required documents (Aadhar copy, TC, photograph)
+          with this form.
+        </small>
+      </footer>
     </div>
   );
 }

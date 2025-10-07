@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Pencil, Trash2, CheckCircle, XCircle, FileText, UserX } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  FileText,
+  UserX,
+} from "lucide-react";
+import { getImageURL } from "../../utils/getImageURL";
 import { handleDownloadPDF } from "../../utils/handleDownloadPDF";
 
 export default function StudentList() {
@@ -64,7 +72,6 @@ export default function StudentList() {
     setEditStudent(student);
     setForm(student);
 
-    // Sections filter by class
     const filtered = classes
       .filter((cls) => cls.name === student.className)
       .map((cls) => cls.section);
@@ -88,7 +95,9 @@ export default function StudentList() {
     try {
       await axios.put(`${API_URL}/api/students/${editStudent.id}`, form);
       setStudents(
-        students.map((s) => (s.id === editStudent.id ? { ...s, ...form } : s))
+        students.map((s) =>
+          s.id === editStudent.id ? { ...s, ...form } : s
+        )
       );
       setEditStudent(null);
       showToast("success", "✅ Student updated successfully");
@@ -97,7 +106,12 @@ export default function StudentList() {
     }
   };
 
-  if (loading) return <p className="p-6">⏳ Loading students...</p>;
+  if (loading)
+    return (
+      <div className="p-6 text-center text-gray-500 text-lg">
+        ⏳ Loading students...
+      </div>
+    );
 
   return (
     <div className="p-6 relative">
@@ -105,9 +119,9 @@ export default function StudentList() {
 
       {/* Student Table */}
       {students.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300 bg-white shadow">
-            <thead className="bg-gray-100">
+        <div className="overflow-x-auto rounded-lg shadow-lg">
+          <table className="w-full border-collapse bg-white">
+            <thead className="bg-blue-50 text-gray-700">
               <tr>
                 <th className="border p-2">Photo</th>
                 <th className="border p-2">UID</th>
@@ -117,31 +131,32 @@ export default function StudentList() {
                 <th className="border p-2">Section</th>
                 <th className="border p-2">Roll</th>
                 <th className="border p-2">Phone</th>
-                <th className="border p-2">Actions</th>
+                <th className="border p-2 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {students.map((s) => (
-                <tr key={s.id}>
+                <tr
+                  key={s.id}
+                  className="hover:bg-blue-50 transition-colors duration-200"
+                >
                   <td className="border p-2 text-center">
-                    {s.photo ? (
-                      <img
-                        src={`${API_URL}${s.photo}`}
-                        alt={s.name}
-                        className="w-12 h-12 object-cover rounded-full mx-auto"
-                      />
-                    ) : (
-                      "—"
-                    )}
+                    <img
+                      src={getImageURL(s.photo, API_URL)}
+                      alt={s.name}
+                      className="w-12 h-12 object-cover rounded-full mx-auto border"
+                    />
                   </td>
-                  <td className="border p-2">{s.uid}</td>
-                  <td className="border p-2">{s.admissionNo}</td>
+                  <td className="border p-2 text-gray-700">{s.uid}</td>
+                  <td className="border p-2 font-semibold text-blue-600">
+                    {s.admissionNo}
+                  </td>
                   <td className="border p-2">{s.name}</td>
                   <td className="border p-2">{s.className}</td>
                   <td className="border p-2">{s.section}</td>
-                  <td className="border p-2">{s.roll}</td>
+                  <td className="border p-2 text-center">{s.roll}</td>
                   <td className="border p-2">{s.phone}</td>
-                  <td className="border p-2 text-center flex justify-center gap-3">
+                  <td className="border p-2 flex justify-center gap-3">
                     <button
                       onClick={() => handleEditClick(s)}
                       className="text-blue-600 hover:text-blue-800"
@@ -177,8 +192,7 @@ export default function StudentList() {
             No Students Found
           </h3>
           <p className="text-gray-500 text-sm text-center max-w-sm">
-            Currently there are no students added in the system. Please add new
-            students to see them listed here.
+            Currently there are no students added in the system.
           </p>
         </div>
       )}
@@ -212,7 +226,6 @@ export default function StudentList() {
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-[500px]">
             <h3 className="text-lg font-bold mb-4">✏️ Edit Student</h3>
-
             <div className="grid grid-cols-1 gap-3">
               <input
                 type="text"
@@ -243,7 +256,9 @@ export default function StudentList() {
               >
                 <option value="">Select Class</option>
                 {[...new Set(classes.map((cls) => cls.name))].map((c, i) => (
-                  <option key={i} value={c}>{c}</option>
+                  <option key={i} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
               <select
@@ -254,7 +269,9 @@ export default function StudentList() {
               >
                 <option value="">Select Section</option>
                 {sections.map((sec, i) => (
-                  <option key={i} value={sec}>{sec}</option>
+                  <option key={i} value={sec}>
+                    {sec}
+                  </option>
                 ))}
               </select>
               <input
@@ -321,7 +338,11 @@ export default function StudentList() {
           className={`fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50
             ${toast.type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}
         >
-          {toast.type === "success" ? <CheckCircle size={20} /> : <XCircle size={20} />}
+          {toast.type === "success" ? (
+            <CheckCircle size={20} />
+          ) : (
+            <XCircle size={20} />
+          )}
           <span>{toast.msg}</span>
         </div>
       )}

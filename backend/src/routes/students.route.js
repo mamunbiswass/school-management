@@ -1,181 +1,113 @@
 import express from "express";
-import db from "../db.js"; // ✅ mysql2/promise connection pool
+import db from "../db.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 
 const router = express.Router();
 
-// ================== Multer Setup ==================
+// 📁 Create upload directory if not exists
+const uploadDir = path.join(process.cwd(), "src", "uploads", "students");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+// 🖼️ Multer setup
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = "uploads/students";
-    if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
-    cb(null, uploadPath);
-  },
+  destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);
   },
 });
 const upload = multer({ storage });
 
-// ================== Routes ==================
+// 🎯 Generate Admission Number
+function generateAdmissionNo(schoolName, className, section, roll) {
+  const initials = schoolName
+    .split(" ")
+    .map((w) => w[0]?.toUpperCase())
+    .join("");
+  const year = new Date().getFullYear();
+  return `${initials}${year}${className}${section}${roll || ""}`;
+}
 
-// ✅ Get all students
-router.get("/", async (req, res) => {
+// 🧾 Add new student
+router.post("/", upload.single("photo"), async (req, res) => {
+  try {
+    const body = req.body;
+    const photoPath = req.file ? `/uploads/students/${req.file.filename}` : null;
+
+    const admissionNo = generateAdmissionNo(
+      "Elite Knowledge School",
+      body.className,
+      body.section,
+      body.roll
+    );
+
+    const [result] = await db.query(
+      `INSERT INTO students
+        (admissionNo, uid, name, gender, dob, address, className, section, roll,
+         father, mother, phone, email, bloodGroup, emergencyContact,
+         healthInfo, caste, religion, motherTongue, hobbies, photo)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        admissionNo,
+        body.uid,
+        body.name,
+        body.gender,
+        body.dob,
+        body.address,
+        body.className,
+        body.section,
+        body.roll || null,
+        body.father,
+        body.mother,
+        body.phone,
+        body.email,
+        body.bloodGroup,
+        body.emergencyContact,
+        body.healthInfo,
+        body.caste,
+        body.religion,
+        body.motherTongue,
+        body.hobbies,
+        photoPath,
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: "✅ Student admitted successfully!",
+      admissionNo,
+      id: result.insertId,
+    });
+  } catch (err) {
+    console.error("❌ Insert student error:", err);
+    res.status(500).json({ error: "Database insert failed", details: err });
+  }
+});
+
+// 📄 Fetch all students
+router.get("/", async (_req, res) => {
   try {
     const [rows] = await db.query("SELECT * FROM students ORDER BY id DESC");
     res.json(rows);
   } catch (err) {
     console.error("❌ Fetch students error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Failed to fetch students" });
   }
 });
 
-// ✅ Get single student by ID
+// 📄 Get single student by ID
 router.get("/:id", async (req, res) => {
   try {
     const [rows] = await db.query("SELECT * FROM students WHERE id = ?", [
       req.params.id,
     ]);
-    if (rows.length === 0) return res.status(404).json({ error: "Student not found" });
+    if (rows.length === 0)
+      return res.status(404).json({ error: "Student not found" });
     res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ✅ Create new student (Admission)
-router.post("/", upload.single("photo"), async (req, res) => {
-  try {
-    const data = req.body;
-
-    if (req.file) {
-      data.photo = "/uploads/students/" + req.file.filename;
-    }
-
-    const sql = `
-      INSERT INTO students 
-      (uid, admissionNo, name, gender, dob, address,
-       className, section, roll, admissionDate,
-       father, mother, fatherOccupation, motherOccupation,
-       phone, email, guardian, guardianRelation, guardianPhone,
-       bloodGroup, emergencyContact, healthInfo,
-       caste, religion, nationality, motherTongue, hobbies, photo)
-      VALUES (?, ?, ?, ?, ?, ?,
-              ?, ?, ?, ?,
-              ?, ?, ?, ?,
-              ?, ?, ?, ?, ?,
-              ?, ?, ?,
-              ?, ?, ?, ?, ?, ?)
-    `;
-
-    const values = [
-      data.uid,
-      data.admissionNo,
-      data.name,
-      data.gender,
-      data.dob,
-      data.address,
-      data.className,
-      data.section,
-      data.roll,
-      data.admissionDate,
-      data.father,
-      data.mother,
-      data.fatherOccupation,
-      data.motherOccupation,
-      data.phone,
-      data.email,
-      data.guardian,
-      data.guardianRelation,
-      data.guardianPhone,
-      data.bloodGroup,
-      data.emergencyContact,
-      data.healthInfo,
-      data.caste,
-      data.religion,
-      data.nationality,
-      data.motherTongue,
-      data.hobbies,
-      data.photo || null,
-    ];
-
-    await db.query(sql, values);
-
-    res.json({ success: true, message: "✅ Student admitted successfully" });
-  } catch (err) {
-    console.error("❌ Admission error:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// ✅ Check Aadhaar duplication
-router.get("/check/:uid", async (req, res) => {
-  try {
-    const { uid } = req.params;
-    const [rows] = await db.query("SELECT id FROM students WHERE uid = ?", [uid]);
-
-    if (rows.length > 0) {
-      return res.json({ exists: true });
-    }
-    res.json({ exists: false });
-  } catch (err) {
-    console.error("❌ Aadhaar check error:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// ✅ Update student
-router.put("/:id", upload.single("photo"), async (req, res) => {
-  try {
-    const id = req.params.id;
-    const data = req.body;
-
-    // যদি photo update করে
-    if (req.file) {
-      data.photo = "/uploads/students/" + req.file.filename;
-    }
-
-    // Build update query dynamically
-    const fields = Object.keys(data);
-    const values = Object.values(data);
-
-    if (fields.length === 0) {
-      return res.status(400).json({ error: "No fields provided for update" });
-    }
-
-    const updates = fields.map((f) => `${f} = ?`).join(", ");
-    const sql = `UPDATE students SET ${updates} WHERE id = ?`;
-
-    await db.query(sql, [...values, id]);
-
-    res.json({ success: true, message: "Student updated successfully" });
-  } catch (err) {
-    console.error("❌ Update error:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ✅ Delete student
-router.delete("/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    // Delete photo if exists
-    const [rows] = await db.query("SELECT photo FROM students WHERE id = ?", [id]);
-    if (rows.length > 0 && rows[0].photo) {
-      const photoPath = path.join(process.cwd(), rows[0].photo);
-      if (fs.existsSync(photoPath)) fs.unlinkSync(photoPath);
-    }
-
-    await db.query("DELETE FROM students WHERE id = ?", [id]);
-    res.json({ success: true, message: "Student deleted successfully" });
-  } catch (err) {
-    console.error("❌ Delete error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Failed to fetch student" });
   }
 });
 

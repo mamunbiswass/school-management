@@ -1,120 +1,112 @@
-@page {
-  size: A4;
-  margin: 12mm 12mm;
-}
-
-body {
-  font-family: "Helvetica", Arial, sans-serif;
-}
-
-.sheet {
-  width: 210mm;
-  min-height: 297mm;
-  margin: 0 auto;
+.admission-sheet {
+  width: 850px;
+  margin: 20px auto;
+  padding: 25px 40px;
   background: #fff;
-  padding: 18mm;
-  box-sizing: border-box;
-  color: #1f2937;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-.logo {
-  width: 72px;
-  height: 72px;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  font-family: "Segoe UI", sans-serif;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.admission-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-weight: 700;
+  justify-content: space-between;
+  border-bottom: 3px solid #004aad;
+  padding-bottom: 10px;
 }
-.school-info {
-  flex: 1;
-  text-align: center;
-}
-.school-info h1 {
-  margin: 0;
-  font-size: 20px;
-}
-.school-info p {
-  margin: 2px 0;
-  font-size: 12px;
-}
-.photo-box {
+
+.school-logo-box {
   width: 90px;
-  height: 110px;
-  border: 1px solid #d1d5db;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: #6b7280;
+  height: 90px;
+}
+.school-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 12px 0 18px;
-  border: none;
-}
-
-.title {
+.school-details {
   text-align: center;
-  margin-bottom: 12px;
+  flex: 1;
 }
-.title h2 {
+.school-details h1 {
   margin: 0;
-  font-size: 16px;
-  letter-spacing: 1px;
+  font-size: 24px;
+  color: #004aad;
+}
+.school-details p {
+  margin: 3px 0;
+}
+.muted {
+  color: #555;
+  font-size: 13px;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+.student-photo-box {
+  width: 90px;
+  height: 90px;
+  border: 1px solid #ccc;
 }
-.info {
+.student-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.form-title {
+  text-align: center;
+  margin: 15px 0;
+  background: #004aad;
+  color: white;
+  padding: 6px 0;
+  border-radius: 4px;
+}
+
+.section-title {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #004aad;
+  border-bottom: 2px solid #004aad;
+  padding-bottom: 3px;
+}
+
+.info-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  margin-top: 8px;
+  font-size: 14px;
 }
-.info td {
-  border: 1px solid #e6e7eb;
-  padding: 6px;
+.info-table th {
+  background: #f0f4ff;
+  width: 25%;
+  text-align: left;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
 }
-.info td.label {
-  background: #f8fafc;
-  font-weight: 600;
-  width: 38%;
-}
-.full {
-  grid-column: 1 / -1;
+.info-table td {
+  border: 1px solid #ccc;
+  padding: 6px 8px;
 }
 
-.sigs {
+.signature-area {
   display: flex;
-  gap: 12px;
-  margin-top: 18px;
-}
-.sig {
-  flex: 1;
+  justify-content: space-around;
+  margin-top: 30px;
   text-align: center;
-  font-size: 12px;
 }
 .sig .line {
-  height: 1px;
-  background: #cbd5e1;
-  margin: 36px 20px 8px;
+  border-top: 1px solid #000;
+  margin-bottom: 5px;
+  width: 160px;
+  margin: 0 auto 5px;
 }
 
-.footer {
-  margin-top: 14px;
+.admission-footer {
   text-align: center;
-  font-size: 11px;
-  color: #6b7280;
+  margin-top: 25px;
+  border-top: 1px solid #ccc;
+  padding-top: 8px;
+  font-size: 12px;
+  color: #555;
 }
