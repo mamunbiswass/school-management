@@ -111,4 +111,15 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/check-aadhaar/:uid", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT id FROM students WHERE uid = ?", [req.params.uid]);
+    res.json({ exists: rows.length > 0 });
+  } catch (err) {
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+
+
 export default router;
